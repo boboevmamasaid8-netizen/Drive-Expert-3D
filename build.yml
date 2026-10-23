@@ -1,0 +1,43 @@
+name: Build Drive Expert 3D APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip openjdk-17-jdk
+          wget -q https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          unzip Godot_v4.4.1-stable_linux.x86_64.zip
+          chmod +x Godot_v4.4.1-stable_linux.x86_64
+          sudo mv Godot_v4.4.1-stable_linux.x86_64 /usr/local/bin/godot
+
+      - name: Check project
+        run: |
+          if [ ! -f project.godot ]; then
+            echo "ERROR: project.godot not found"
+            exit 1
+          fi
+
+      - name: Build project
+        run: |
+          godot --headless --path . --editor --quit
+
+      - name: Upload project
+        uses: actions/upload-artifact@v4
+        with:
+          name: Drive-Expert-3D-Project
+          path: |
+            project.godot
+            **/*.tscn
+            **/*.gd# Drive-Expert-3D
